@@ -2,7 +2,8 @@ require "logstash/version"
 
 namespace "artifact" do
 
-  PACKAGE_SUFFIX = ENV["RELEASE"] == "1" ? "" : "-SNAPSHOT"
+  SNAPSHOT_BUILD = ENV["RELEASE"] != "1"
+  PACKAGE_SUFFIX = SNAPSHOT_BUILD ? "-SNAPSHOT" : ""
 
   def package_files
     [
@@ -182,7 +183,7 @@ namespace "artifact" do
     tar = Archive::Tar::Minitar::Output.new(gz)
     files.each do |path|
       stat = File.lstat(path)
-      path_in_tar = "logstash-#{LOGSTASH_VERSION}/#{path}"
+      path_in_tar = "logstash-#{LOGSTASH_VERSION}#{PACKAGE_SUFFIX}/#{path}"
       opts = {
         :size => stat.size,
         :mode => stat.mode,
@@ -227,7 +228,7 @@ namespace "artifact" do
     File.unlink(zippath) if File.exists?(zippath)
     Zip::File.open(zippath, Zip::File::CREATE) do |zipfile|
       files.each do |path|
-        path_in_zip = "logstash-#{LOGSTASH_VERSION}/#{path}"
+        path_in_zip = "logstash-#{LOGSTASH_VERSION}#{PACKAGE_SUFFIX}/#{path}"
         zipfile.add(path_in_zip, path)
       end
     end

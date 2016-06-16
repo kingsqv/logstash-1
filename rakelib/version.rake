@@ -109,27 +109,7 @@ namespace :version do
     Rake::Task["version:sync"].invoke; Rake::Task["version:sync"].reenable
   end
 
-  desc "set version of logstash package"
-  task :set_package, [:version] => [:validate] do |t, args|
-    hash = {}
-    get_versions.each do |component, metadata|
-      if component == "logstash"
-        hash[component] = args[:version]
-      else
-        hash[component] = metadata["yaml_version"]
-      end
-    end
-    IO.write("versions.yml", hash.to_yaml)
-    Rake::Task["version:sync"].invoke; Rake::Task["version:sync"].reenable
-  end
-
   desc "set version of logstash-core-plugin-api"
-  task :validate, :version do |t, args|
-    unless Regexp.new('^\d+\.\d+\.\d+(?:-\w+\d+)?$').match(args[:version])
-      abort("Invalid version argument: \"#{args[:version]}\". Aborting...")
-    end
-  end
-
   task :set_plugin_api, [:version] => [:validate] do |t, args|
     hash = {}
     get_versions.each do |component, metadata|
@@ -142,4 +122,11 @@ namespace :version do
     IO.write("versions.yml", hash.to_yaml)
     Rake::Task["version:sync"].invoke; Rake::Task["version:sync"].reenable
   end
+
+  task :validate, :version do |t, args|
+    unless Regexp.new('^\d+\.\d+\.\d+(?:-\w+\d+)?$').match(args[:version])
+      abort("Invalid version argument: \"#{args[:version]}\". Aborting...")
+    end
+  end
+
 end
